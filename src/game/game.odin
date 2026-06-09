@@ -3,6 +3,7 @@ package game
 import rl "vendor:raylib"
 
 Game :: struct {
+	Player: Player,
 
 }
 
@@ -16,20 +17,18 @@ CreateGameFlags :: proc() -> GameFlags {
 	}
 }
 
-PlayerFlags :: struct {
 
-}
-
-CreatePlayerFlags :: proc() -> PlayerFlags {
-	return {
-
-	}
-}
 
 newGame :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
-	return {
+	p := newPlayer(pFlags)
 
+	return {
+		Player = p,
 	}
+}
+
+Update :: proc(self: ^Game) {
+	UpdatePlayer(&self.Player)
 }
 
 Draw :: proc(self: ^Game) {
@@ -38,11 +37,9 @@ Draw :: proc(self: ^Game) {
 	rl.ClearBackground(rl.SKYBLUE)
 	rl.DrawFPS(0, 0)
 
+	DrawPlayer(&self.Player)
+
 	rl.EndDrawing()
-}
-
-Update :: proc(self: ^Game) {
-
 }
 
 CheckIsGameRunning :: proc(self: ^Game) -> bool {

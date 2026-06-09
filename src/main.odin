@@ -1,10 +1,28 @@
 package main
 
 import "core:fmt"
-import "components"
+import rl "vendor:raylib"
+
+import "game"
+
+GameInst : game.Game
+
+setup :: proc() {
+	windowFlags := game.createWindowFlags({1280, 720}, "Mushrooms and Alchemy", .Q)
+	game.createWindow(windowFlags)
+	GameInst = game.newGame({}, {})
+}
 
 main :: proc() {
-	fmt.printfln("Hello, World!")
-
-
+	setup()
+	defer cleanup()
+	for (game.CheckIsGameRunning(&GameInst)) {
+		game.Update(&GameInst)
+		game.Draw(&GameInst)
+	}
 }
+
+cleanup :: proc() {
+	rl.CloseWindow()
+}
+

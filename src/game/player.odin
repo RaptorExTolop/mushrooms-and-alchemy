@@ -60,7 +60,9 @@ update_player :: proc(self: ^Player, dt: f32) {
 	dir: i32 = get_player_dir()
 
 	// move the player based on the direction inputed
-	move_player(self, dt, dir)
+	calculate_velocity(self, dt, dir)
+
+	move_and_slide(self, dt)
 }
 
 @(private="file")
@@ -72,7 +74,7 @@ get_player_dir :: proc() -> i32 {
 }
 
 @(private="file")
-move_player :: proc(self: ^Player, dt: f32, dir: i32) {
+calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 	self.velocity.x += self.accel * f32(dir) * dt
 	self.velocity.x = clamp(self.velocity.x, -self.maxSpeed, self.maxSpeed)
 
@@ -85,8 +87,12 @@ move_player :: proc(self: ^Player, dt: f32, dir: i32) {
 		}
 	}
 
-	self.pos += self.velocity * dt
 }
+
+@(private="file")
+move_and_slide :: proc(self: ^Player, dt: f32) {
+	self.pos += self.velocity * dt
+} 
 
 // draw the player
 draw_player :: proc(self: ^Player) {

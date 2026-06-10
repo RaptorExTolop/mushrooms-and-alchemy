@@ -11,7 +11,7 @@ GameFlags :: struct {
 
 }
 
-CreateGameFlags :: proc() -> GameFlags {
+create_game_flags :: proc() -> GameFlags {
 	return {
 
 	}
@@ -19,29 +19,30 @@ CreateGameFlags :: proc() -> GameFlags {
 
 
 
-newGame :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
-	p := newPlayer(pFlags)
+new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
+	p := new_player(pFlags)
 
 	return {
 		Player = p,
 	}
 }
 
-Update :: proc(self: ^Game) {
-	UpdatePlayer(&self.Player)
+update :: proc(self: ^Game) {
+	update_player(&self.Player, rl.GetFrameTime())
 }
 
-Draw :: proc(self: ^Game) {
+draw :: proc(self: ^Game) {
 	rl.BeginDrawing()
 
 	rl.ClearBackground(rl.SKYBLUE)
 	rl.DrawFPS(0, 0)
 
-	DrawPlayer(&self.Player)
+	draw_player(&self.Player)
 
 	rl.EndDrawing()
 }
 
-CheckIsGameRunning :: proc(self: ^Game) -> bool {
+check_game_is_running :: proc(self: ^Game) -> bool {
 	return !rl.WindowShouldClose()
 }
+

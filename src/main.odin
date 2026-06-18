@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import rl "vendor:raylib"
+import hb "components/hitbox"
 
 import "game"
 
@@ -11,7 +12,16 @@ setup :: proc() {
 	windowFlags := game.createWindowFlags({1280, 720}, "Mushrooms and Alchemy", .Q)
 	game.createWindow(windowFlags)
 
-	pFlags := game.create_player_flags({250, 250}, {60, 60}, 1, 400, 400*6, 900)
+	pFlags := game.create_player_flags(
+		//pos & size
+		{250, 250}, {60, 60}, 
+		// starting dir and horizontal movement 
+		1, 400, 400*6, 1500, 
+		// the player hitbox
+		hb.new_hitbox(0, 0, 60, 60, 0, true),
+		// vertical movement
+		650, 2200
+		)
 
 	GameInst = game.new_game({}, pFlags)
 }

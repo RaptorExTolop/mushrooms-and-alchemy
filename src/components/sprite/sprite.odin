@@ -2,6 +2,7 @@ package sprite
 
 import rl "vendor:raylib"
 import anim "shared:anim"
+import "base:intrinsics"
 
 Sprite :: struct {
 	img: rl.Texture2D,
@@ -31,7 +32,7 @@ play :: proc(self: ^Sprite, animationEnumValue: $E) where intrinsics.type_is_enu
 
 	if (self.curr != nextIdx) {
 		self.curr = nextIdx
-		anim.reset_animation(self.animations[self.curr])
+		anim.reset_animation(&self.animations[self.curr])
 	}
 }
 
@@ -40,12 +41,17 @@ update :: proc(self: ^Sprite, dt: f32) {
 	anim.update_animation(&self.animations[self.curr], dt)
 }
 
-draw :: proc(self: ^Sprite, position: rl.Vector2, rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE) {
+draw :: proc(
+	self: ^Sprite, position: rl.Vector2, rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE, hFlip: bool = false,
+	vFlip: bool = false
+) {
 	if (len(self.animations) == 0) {
 		rl.DrawTextureEx(self.img, position, rotation, scale, tint)
 	}
 
 	src := anim.get_animation_frame_rl(&self.animations[self.curr])
+	if (vFlip) do src.height = -src.height
+	if (hFlip) do src.width = -src.width
 	
 	dest := rl.Rectangle{
 		position.x, position.y,

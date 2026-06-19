@@ -2,6 +2,8 @@ package game
 
 import rl "vendor:raylib"
 import "core:math"
+import sprite "../components/sprite/"
+import anim "shared:anim"
 
 Game :: struct {
 	Player: Player,
@@ -23,6 +25,28 @@ create_game_flags :: proc() -> GameFlags {
 new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	p := new_player(pFlags)
 
+	idleAnim := anim.new_animation(
+		40, 43, 40, 16, 1, 8, 0.20, .REPEATING
+	)
+	sprite.add_animation(&p.sprite, idleAnim, PlayerAnimations.IDLE)
+
+	runningAnim := anim.new_animation(
+		9, 16, 9, 16, 1, 8, 0.20, .REPEATING
+	)
+	sprite.add_animation(&p.sprite, runningAnim, PlayerAnimations.RUNNING)
+
+	jumpingAnim := anim.new_animation(
+		48, 50, 48, 16, 1, 8, 0.20, .REPEATING
+	)
+	sprite.add_animation(&p.sprite, jumpingAnim, PlayerAnimations.JUMPING)
+
+	fallingAnim := anim.new_animation(
+		56, 58, 56, 16, 1, 8, 0.20, .REPEATING
+	)
+	sprite.add_animation(&p.sprite, fallingAnim, PlayerAnimations.FALLING)
+
+
+	
 	return {
 		Player = p,
 	}
@@ -50,5 +74,9 @@ draw :: proc(self: ^Game) {
 
 check_game_is_running :: proc(self: ^Game) -> bool {
 	return !rl.WindowShouldClose()
+}
+
+cleanup :: proc(self: ^Game) {
+	cleanup_player(&self.Player)
 }
 

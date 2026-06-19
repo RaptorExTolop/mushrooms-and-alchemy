@@ -20,8 +20,10 @@ setup :: proc() {
 		// the player hitbox
 		hb.new_hitbox(0, 0, 60, 60, 0, true),
 		// vertical movement
-		650, 2200
-		)
+		650, 2200,
+		rl.LoadTexture("src/assets/playerChar/herochar_spritesheet(new).png"),
+		1,
+	)
 
 	GameInst = game.new_game({}, pFlags)
 }
@@ -29,6 +31,8 @@ setup :: proc() {
 main :: proc() {
 	setup()
 	defer cleanup()
+
+	fmt.printfln("Filepath: {}", rl.GetWorkingDirectory())
 	for (game.check_game_is_running(&GameInst)) {
 		game.update(&GameInst)
 		game.draw(&GameInst)

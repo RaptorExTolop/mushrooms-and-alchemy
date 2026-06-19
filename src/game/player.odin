@@ -141,7 +141,7 @@ update_player :: proc(self: ^Player, dt: f32) {
 	// check to see if the player should jump
 	jump(self, dt)
 
-	// if the player is not on the fall play the falling animation
+	// if the player is not on the fall and is moving down play the falling animation
 	if (!self.onFloor && self.velocity.y > 0) {
 		sprite.play(&self.sprite, PlayerAnimations.FALLING)
 	}

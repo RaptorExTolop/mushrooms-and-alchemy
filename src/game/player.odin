@@ -247,3 +247,4 @@ draw_player :: proc(self: ^Player) {
 cleanup_player :: proc(self: ^Player) {
 	rl.UnloadTexture(self.sprite.img)
 }
+

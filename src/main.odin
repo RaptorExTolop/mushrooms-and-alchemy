@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import rl "vendor:raylib"
 import hb "components/hitbox"
+import "components/moveable"
 
 import "game"
 
@@ -16,13 +17,15 @@ setup :: proc() {
 		//pos & size
 		{250, 250}, {60, 60}, 
 		// starting dir and horizontal movement 
-		1, 400, 400*6, 1500, 
+		// 1, 400, 400*6, 1500, 
 		// the player hitbox
 		hb.new_hitbox(0, 0, 60, 60, 0, true),
+		moveable.new_moveable(
+			400, 400 * 6, 1500, 1
+		),
 		// vertical movement
 		650, 2200,
 		rl.LoadTexture("src/assets/playerChar/herochar_spritesheet(new).png"),
-		1,
 	)
 
 	GameInst = game.new_game({}, pFlags)

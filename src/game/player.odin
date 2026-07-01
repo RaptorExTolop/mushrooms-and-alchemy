@@ -3,8 +3,9 @@ package game
 import "core:fmt"
 import "core:math"
 import rl "vendor:raylib"
-import hb "../components/hitbox/"
+import hb "../components/hitbox"
 import sprite "../components/sprite"
+import "../components/moveable"
 
 // all of the animations the player needs
 PlayerAnimations :: enum {
@@ -22,34 +23,30 @@ PlayerFlags :: struct {
 	pos: rl.Vector2,
 	size: rl.Vector2,
 	hitbox: hb.Hitbox,
-	startingDir: i8,
-	maxSpeed, acceleration, friction: f32,
+	moveable: moveable.Moveable,
 	jumpStrength, gravity: f32,
 	spriteImg: rl.Texture2D,
-	facing: i32
 }
 
 // allow the user to create a player flags struct
 create_player_flags :: proc(
-	startingPosition, dimesions: rl.Vector2, startingDir: i8, maxSpeed, acceleration, friction: f32, hitbox: hb.Hitbox,
+	startingPosition, dimesions: rl.Vector2, hitbox: hb.Hitbox,
+	moveable: moveable.Moveable,
 	jumpStrength, gravity: f32,
 	spriteImg: rl.Texture2D,
-	facing: i32,
 ) -> PlayerFlags {
 	return {
 		pos = startingPosition,
 		size = dimesions,
-		startingDir = startingDir,
-		maxSpeed = maxSpeed,
-		acceleration = acceleration,
-		friction = friction,
 		hitbox = hitbox,
+		moveable = moveable,
 		jumpStrength = jumpStrength,
 		gravity = gravity,
 		spriteImg = spriteImg,
-		facing = facing,
 	}
 }
+
+
 
 // the player struct
 @private
@@ -57,29 +54,16 @@ Player :: struct {
 	// the player's position within the world
 	pos: rl.Vector2, 
 
-	// the player's velocity
-	velocity: rl.Vector2,
-
 	// how large the player is
 	size: rl.Vector2,
+
+	moveable: moveable.Moveable,
 
 	// The sprite for the player
 	sprite: sprite.Sprite,
 
 	// Used for drawing a rectangle under the player
 	colour: rl.Color,
-
-	// What is the players direction OUTDATED NEEDS TO BE REMOVED
-	direction: i8,
-
-	// The max speed in the x axis the player can have
-	maxSpeed: f32,
-
-	// The amount the player accelerates by
-	accel: f32,
-
-	// How much friction the player experiences
-	friction: f32,
 
 	// The hitbox of the player
 	hitbox: hb.Hitbox,
@@ -94,9 +78,6 @@ Player :: struct {
 
 	// How much gravity the player should feel
 	gravity: f32,
-
-	// What is the current direction the player is facing
-	facing: i32,
 }
 
 // create a new player using the pFlag struct they created earlier
@@ -107,17 +88,12 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 	player.pos = pFlags.pos
 	player.size = pFlags.size
 	player.colour = rl.RAYWHITE
-	player.direction = pFlags.startingDir
-	player.maxSpeed = pFlags.maxSpeed
-	player.accel = pFlags.acceleration
-	player.friction = pFlags.friction
-	player.velocity = {0, 0}
+	player.moveable = pFlags.moveable
 	player.hitbox = pFlags.hitbox
 	player.onFloor = false
 	player.wasOnFloor = false
 	player.jumpStrength = pFlags.jumpStrength
 	player.gravity = pFlags.gravity
-	player.facing = pFlags.facing
 
 	player.sprite = sprite.new_sprite(pFlags.spriteImg)
 
@@ -133,14 +109,14 @@ update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle)
 	sprite.update(&self.sprite, dt)
 
 	// add gravity to the player
-	self.velocity.y += self.gravity * dt
+	self.moveable.velocity.y += self.gravity * dt
 
 	// get the direction the player is facing this frame
 	dir: i32 = get_player_dir()
 
 	// if the player has a new direction, change the dir the player is facing
 	if (dir != 0) {
-		self.facing = dir
+		self.moveable.direction = dir
 	} 
 
 	// move the player horizontaly based on the direction inputed
@@ -172,23 +148,23 @@ get_player_dir :: proc() -> i32 {
 @(private="file")
 calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 	// Add velocity to the player based on the input of the player this frame
-	self.velocity.x += self.accel * f32(dir) * dt
+	self.moveable.velocity.x += self.moveable.accel * f32(dir) * dt
 
 	// clamp the velocity so it is within a reasonable range
-	self.velocity.x = clamp(self.velocity.x, -self.maxSpeed, self.maxSpeed)
+	self.moveable.velocity.x = clamp(self.moveable.velocity.x, -self.moveable.maxSpeed, self.moveable.maxSpeed)
 
 	// if we are not inputted this frame apply friction
 	if (dir == 0) {
 
 		// get the amount of friction
-		frictionAmount := self.friction * dt
+		frictionAmount := self.moveable.friction * dt
 
 		// if the absolute value (no negatives) of the velocity is less than the friction
 		// amount set the players velocity to 0, otherwise apply friction to the player 
-		if (abs(self.velocity.x) <= frictionAmount) {
-			self.velocity.x = 0
+		if (abs(self.moveable.velocity.x) <= frictionAmount) {
+			self.moveable.velocity.x = 0
 		} else {
-			self.velocity.x -= math.sign(self.velocity.x) * frictionAmount
+			self.moveable.velocity.x -= math.sign(self.moveable.velocity.x) * frictionAmount
 		}
 	} 
 }
@@ -197,7 +173,7 @@ calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 @(private="file")
 jump :: proc(self: ^Player, dt: f32) {
 	if ( (rl.IsKeyDown(.SPACE) || rl.IsKeyDown(.UP) || rl.IsKeyDown(.W)) && self.onFloor) {
-		self.velocity.y -= self.jumpStrength 
+		self.moveable.velocity.y -= self.jumpStrength 
 	}
 }
 
@@ -205,7 +181,7 @@ jump :: proc(self: ^Player, dt: f32) {
 @(private="file")
 move_and_slide :: proc(self: ^Player, dt: f32) {
 	// update the player position
-	self.pos += self.velocity * dt
+	self.pos += self.moveable.velocity * dt
 
 	// update the player's hitbox position
 	self.hitbox.rect = {self.pos.x, self.pos.y, self.size.x, self.size.y}
@@ -236,7 +212,7 @@ check_animation :: proc(self: ^Player) {
 
 	// If the player has just left the ground, and we are moving up (world space)
 	// We must have jumped, play the jump animation
-	if (justLeftGround && self.velocity.y < -0.7) {
+	if (justLeftGround && self.moveable.velocity.y < -0.7) {
 		sprite.play(&self.sprite, PlayerAnimations.JUMP)
 		self.wasOnFloor = self.onFloor
 		return 
@@ -246,7 +222,7 @@ check_animation :: proc(self: ^Player) {
 	if (!self.onFloor) {
 		// If we are going down, play the down animation
 		// If we are going up, play the up animation
-		if (self.velocity.y > 0) {
+		if (self.moveable.velocity.y > 0) {
 			sprite.play(&self.sprite, PlayerAnimations.DOWN)
 		} else {
 			sprite.play(&self.sprite, PlayerAnimations.UP)
@@ -254,7 +230,7 @@ check_animation :: proc(self: ^Player) {
 	// If we are on the floor
 	} else {
 		// Check for horizontal movement
-		if (math.abs(self.velocity.x) > 0) {
+		if (math.abs(self.moveable.velocity.x) > 0) {
 			// if there is we are running
 			sprite.play(&self.sprite, PlayerAnimations.RUNNING)
 		} else {
@@ -293,18 +269,18 @@ check_player_collision :: proc(self: ^Player, rec: rl.Rectangle, rotation: f32 =
 	// if the collision was against the floor 
 	if (colOut.cFloor) {
 		self.onFloor = true
-		self.velocity.y = 0
+		self.moveable.velocity.y = 0
 	}
 
 	if (colOut.cRight | colOut.cLeft) {
-		self.velocity.x = 0
+		self.moveable.velocity.x = 0
 	}
 }
 
 // draw the player
 draw_player :: proc(self: ^Player) {
 	// check if the player is hit
-	flipped := self.facing < 0
+	flipped := self.moveable.direction < 0
 	// rl.DrawRectangleV(self.pos, self.size, self.colour)
 
 	// draw the current sprite

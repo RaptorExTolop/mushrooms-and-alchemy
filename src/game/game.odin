@@ -31,7 +31,7 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	sprite.add_animation(&p.sprite, idleAnim, PlayerAnimations.IDLE)
 
 	runningAnim := anim.new_animation(
-		8, 13, 8, 16, 1, 8, 0.20, .REPEATING
+		8, 13, 8, 16, 1, 8, 0.15, .REPEATING
 	)
 	sprite.add_animation(&p.sprite, runningAnim, PlayerAnimations.RUNNING)
 
@@ -46,12 +46,12 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	sprite.add_animation(&p.sprite, downAnim, PlayerAnimations.DOWN)
 
 	jumpAnim := anim.new_animation(
-		80, 81, 81, 16, -1, 8, 0.20, .ONESHOT
+		80, 81, 81, 16, -1, 8, 0.075, .ONESHOT
 	)
 	sprite.add_animation(&p.sprite, jumpAnim, PlayerAnimations.JUMP)
 
 	landAnim := anim.new_animation(
-		80, 81, 80, 16, 1, 8, 0.20, .ONESHOT
+		80, 81, 80, 16, 1, 8, 0.075, .ONESHOT
 	)
 	sprite.add_animation(&p.sprite, landAnim, PlayerAnimations.LAND)
 

@@ -86,6 +86,8 @@ Player :: struct {
 
 	// Is the player on the floor?
 	onFloor: bool,
+	// Was the player on the floor the last physics check
+	wasOnFloor: bool,
 
 	// How high can the player jump
 	jumpStrength: f32, 
@@ -112,6 +114,7 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 	player.velocity = {0, 0}
 	player.hitbox = pFlags.hitbox
 	player.onFloor = false
+	player.wasOnFloor = false
 	player.jumpStrength = pFlags.jumpStrength
 	player.gravity = pFlags.gravity
 	player.facing = pFlags.facing
@@ -210,34 +213,58 @@ move_and_slide :: proc(self: ^Player, dt: f32) {
 
 @(private)
 check_animation :: proc(self: ^Player) {
-	// the next animation to be played
-	nextAnim := PlayerAnimations.IDLE
+	justLanded := self.onFloor && !self.wasOnFloor
+	justLeftGround := !self.onFloor && self.wasOnFloor
 
-	// the current animation for this frame
-	curAnim := cast(PlayerAnimations)self.sprite.curr
+	currentAnim := cast(PlayerAnimations)self.sprite.curr
 
-	// if we are moving in the x axis
-	if (math.abs(self.velocity.x) > 0) do nextAnim = .RUNNING
-
-	// if we are not on the floor
-	if (!self.onFloor) {
-		// if the current animation is jump
-		if (curAnim == .JUMP) {
-			// if the sprite is finished set a default animation and
-			// check again
-			if (sprite.is_finished(&self.sprite)) {
-				sprite.play(&self.sprite, PlayerAnimations.IDLE)
-				check_animation(self)
-			} else {
-				curAnim = .JUMP
-			}
-		} else {
-			if (self.velocity.y > 0.7) do nextAnim = .UP
-			else if (self.velocity.y < -0.7) do nextAnim = .DOWN
+	// If the current animation is one of out special oneshots
+	if (currentAnim == .JUMP || currentAnim == .LAND) {
+		// check for if the sprite is finished. If it is not, return early
+		if (!sprite.is_finished(&self.sprite)) {
+			self.wasOnFloor = self.onFloor
+			return 
 		}
 	}
-		
-	sprite.play(&self.sprite, nextAnim)
+
+	// If the player has just landed, set the animation to be the land anim
+	if (justLanded) {
+		sprite.play(&self.sprite, PlayerAnimations.LAND)
+		self.wasOnFloor = self.onFloor
+		return 
+	}
+
+	// If the player has just left the ground, and we are moving up (world space)
+	// We must have jumped, play the jump animation
+	if (justLeftGround && self.velocity.y < -0.7) {
+		sprite.play(&self.sprite, PlayerAnimations.JUMP)
+		self.wasOnFloor = self.onFloor
+		return 
+	}
+
+	// If we are not on the floor
+	if (!self.onFloor) {
+		// If we are going down, play the down animation
+		// If we are going up, play the up animation
+		if (self.velocity.y > 0) {
+			sprite.play(&self.sprite, PlayerAnimations.DOWN)
+		} else {
+			sprite.play(&self.sprite, PlayerAnimations.UP)
+		}
+	// If we are on the floor
+	} else {
+		// Check for horizontal movement
+		if (math.abs(self.velocity.x) > 0) {
+			// if there is we are running
+			sprite.play(&self.sprite, PlayerAnimations.RUNNING)
+		} else {
+			// otherwise we are not moving at all
+			sprite.play(&self.sprite, PlayerAnimations.IDLE)
+		}
+	}
+
+	// set wasOnFloor to be if the player is currently on the floor
+	self.wasOnFloor = self.onFloor
 }
 
 @(private)

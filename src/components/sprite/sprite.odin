@@ -1,7 +1,7 @@
 package sprite
 
 import rl "vendor:raylib"
-import anim "shared:anim"
+import anim "shared:animation-system"
 import "base:intrinsics"
 
 Sprite :: struct {

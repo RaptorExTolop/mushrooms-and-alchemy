@@ -3,7 +3,7 @@ package game
 import rl "vendor:raylib"
 import "core:math"
 import sprite "../components/sprite/"
-import anim "shared:anim"
+import anim "shared:animation-system"
 
 Game :: struct {
 	Player: Player,
@@ -31,7 +31,7 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	sprite.add_animation(&p.sprite, idleAnim, PlayerAnimations.IDLE)
 
 	runningAnim := anim.new_animation(
-		9, 16, 9, 16, 1, 8, 0.20, .REPEATING
+		8, 13, 8, 16, 1, 8, 0.20, .REPEATING
 	)
 	sprite.add_animation(&p.sprite, runningAnim, PlayerAnimations.RUNNING)
 
@@ -53,10 +53,10 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 }
 
 update :: proc(self: ^Game) {
-	update_player(&self.Player, rl.GetFrameTime())
+	update_player(&self.Player, rl.GetFrameTime(), { { 100, 300, 100, 100 }, { 0, 520, 1280, 200 }})
 
-	check_player_collisions(&self.Player, {100, 300, 100, 100})
-	check_player_collisions(&self.Player, {0, 520, 1280, 200})
+	// check_player_collisions(&self.Player, {100, 300, 100, 100})
+	// check_player_collisions(&self.Player, {0, 520, 1280, 200})
 }
 
 draw :: proc(self: ^Game) {

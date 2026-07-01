@@ -5,7 +5,6 @@ import "core:math"
 import rl "vendor:raylib"
 import hb "../components/hitbox/"
 import sprite "../components/sprite"
-import anim "shared:anim"
 
 // all of the animations the player needs
 PlayerAnimations :: enum {
@@ -123,7 +122,11 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 }
 
 // update the player
-update_player :: proc(self: ^Player, dt: f32) {
+update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle) {
+	// update the current player sprite 
+	check_animation(self)
+	sprite.update(&self.sprite, dt)
+
 	// add gravity to the player
 	self.velocity.y += self.gravity * dt
 
@@ -141,19 +144,15 @@ update_player :: proc(self: ^Player, dt: f32) {
 	// check to see if the player should jump
 	jump(self, dt)
 
-	// if the player is not on the fall and is moving down play the falling animation
-	if (!self.onFloor && self.velocity.y > 0) {
-		sprite.play(&self.sprite, PlayerAnimations.FALLING)
-	}
+	
+	// move the player
+	move_and_slide(self, dt)
 
 	// set the player to not be on floor at the end of the frame ready for collision checks
 	self.onFloor = false
 
-	// update the current player sprite 
-	sprite.update(&self.sprite, dt)
-
-	// move the player
-	move_and_slide(self, dt)
+	// check colllisions against all collidableObjects
+	check_collisions(self, collidableObjects)
 }
 
 @(private="file")
@@ -175,7 +174,6 @@ calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 
 	// if we are not inputted this frame apply friction
 	if (dir == 0) {
-		sprite.play(&self.sprite, PlayerAnimations.IDLE)
 
 		// get the amount of friction
 		frictionAmount := self.friction * dt
@@ -187,16 +185,13 @@ calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 		} else {
 			self.velocity.x -= math.sign(self.velocity.x) * frictionAmount
 		}
-	} else {
-		sprite.play(&self.sprite, PlayerAnimations.RUNNING)
-	}
+	} 
 }
 
 // allow the player to jump
 @(private="file")
 jump :: proc(self: ^Player, dt: f32) {
 	if ( (rl.IsKeyDown(.SPACE) || rl.IsKeyDown(.UP) || rl.IsKeyDown(.W)) && self.onFloor) {
-		sprite.play(&self.sprite, PlayerAnimations.JUMPING)
 		self.velocity.y -= self.jumpStrength 
 	}
 }
@@ -211,8 +206,30 @@ move_and_slide :: proc(self: ^Player, dt: f32) {
 	self.hitbox.rect = {self.pos.x, self.pos.y, self.size.x, self.size.y}
 } 
 
+@(private)
+check_animation :: proc(self: ^Player) {
+	anim := PlayerAnimations.IDLE
+
+	if (math.abs(self.velocity.x) > 0) do anim = .RUNNING
+	if (!self.onFloor) {
+		fmt.printf("Not on floor\n")
+		if (self.velocity.y > 0.7) do anim = .FALLING
+		else if (self.velocity.y < -0.7) do anim = .JUMPING
+	}
+		
+	sprite.play(&self.sprite, anim)
+}
+
+@(private)
+check_collisions :: proc(self: ^Player, collidableObjects: []rl.Rectangle) {
+	for collidableObject in collidableObjects {
+		check_player_collision(self, collidableObject)
+	}
+}
+
 // check a collision against a rectangle and a rotation
-check_player_collisions :: proc(self: ^Player, rec: rl.Rectangle, rotation: f32 = 0, isTrigger: bool = false) {
+@(private)
+check_player_collision :: proc(self: ^Player, rec: rl.Rectangle, rotation: f32 = 0, isTrigger: bool = false) {
 	// get the rectangles hitbox
 	recHb := hb.new_hitbox(rec, rotation, isTrigger)
 
@@ -230,6 +247,10 @@ check_player_collisions :: proc(self: ^Player, rec: rl.Rectangle, rotation: f32 
 	if (colOut.cFloor) {
 		self.onFloor = true
 		self.velocity.y = 0
+	}
+
+	if (colOut.cRight | colOut.cLeft) {
+		self.velocity.x = 0
 	}
 }
 

@@ -10,8 +10,10 @@ import sprite "../components/sprite"
 PlayerAnimations :: enum {
 	IDLE,
 	RUNNING,
-	JUMPING,
-	FALLING,
+	JUMP,
+	LAND,
+	UP,
+	DOWN,
 }
 
 // user set flags for creating the player
@@ -208,16 +210,34 @@ move_and_slide :: proc(self: ^Player, dt: f32) {
 
 @(private)
 check_animation :: proc(self: ^Player) {
-	anim := PlayerAnimations.IDLE
+	// the next animation to be played
+	nextAnim := PlayerAnimations.IDLE
 
-	if (math.abs(self.velocity.x) > 0) do anim = .RUNNING
+	// the current animation for this frame
+	curAnim := cast(PlayerAnimations)self.sprite.curr
+
+	// if we are moving in the x axis
+	if (math.abs(self.velocity.x) > 0) do nextAnim = .RUNNING
+
+	// if we are not on the floor
 	if (!self.onFloor) {
-		fmt.printf("Not on floor\n")
-		if (self.velocity.y > 0.7) do anim = .FALLING
-		else if (self.velocity.y < -0.7) do anim = .JUMPING
+		// if the current animation is jump
+		if (curAnim == .JUMP) {
+			// if the sprite is finished set a default animation and
+			// check again
+			if (sprite.is_finished(&self.sprite)) {
+				sprite.play(&self.sprite, PlayerAnimations.IDLE)
+				check_animation(self)
+			} else {
+				curAnim = .JUMP
+			}
+		} else {
+			if (self.velocity.y > 0.7) do nextAnim = .UP
+			else if (self.velocity.y < -0.7) do nextAnim = .DOWN
+		}
 	}
 		
-	sprite.play(&self.sprite, anim)
+	sprite.play(&self.sprite, nextAnim)
 }
 
 @(private)

@@ -60,3 +60,7 @@ draw :: proc(
 
 	rl.DrawTexturePro(self.img, src, dest, {0, 0}, rotation, tint)
 }
+is_finished :: proc(self: ^Sprite) -> bool {
+	return self.animations[self.curr].finished
+}
+

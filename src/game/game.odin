@@ -35,15 +35,25 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	)
 	sprite.add_animation(&p.sprite, runningAnim, PlayerAnimations.RUNNING)
 
-	jumpingAnim := anim.new_animation(
+	upAnim := anim.new_animation(
 		48, 50, 48, 16, 1, 8, 0.20, .REPEATING
 	)
-	sprite.add_animation(&p.sprite, jumpingAnim, PlayerAnimations.JUMPING)
+	sprite.add_animation(&p.sprite, upAnim, PlayerAnimations.UP)
 
-	fallingAnim := anim.new_animation(
+	downAnim := anim.new_animation(
 		56, 58, 56, 16, 1, 8, 0.20, .REPEATING
 	)
-	sprite.add_animation(&p.sprite, fallingAnim, PlayerAnimations.FALLING)
+	sprite.add_animation(&p.sprite, downAnim, PlayerAnimations.DOWN)
+
+	jumpAnim := anim.new_animation(
+		80, 81, 81, 16, -1, 8, 0.20, .ONESHOT
+	)
+	sprite.add_animation(&p.sprite, jumpAnim, PlayerAnimations.JUMP)
+
+	landAnim := anim.new_animation(
+		80, 81, 80, 16, 1, 8, 0.20, .ONESHOT
+	)
+	sprite.add_animation(&p.sprite, landAnim, PlayerAnimations.LAND)
 
 
 	

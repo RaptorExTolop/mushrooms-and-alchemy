@@ -86,7 +86,7 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 	player := Player{}
 
 	player.pos = pFlags.pos
-	player.size = pFlags.size
+	player.size = {16 * 4, 16 * 4}
 	player.colour = rl.RAYWHITE
 	player.moveable = pFlags.moveable
 	player.hitbox = pFlags.hitbox
@@ -104,10 +104,6 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 
 // update the player
 update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle) {
-	// update the current player sprite 
-	check_animation(self)
-	sprite.update(&self.sprite, dt)
-
 	// add gravity to the player
 	self.moveable.velocity.y += self.gravity * dt
 
@@ -124,7 +120,6 @@ update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle)
 
 	// check to see if the player should jump
 	jump(self, dt)
-
 	
 	// move the player
 	move_and_slide(self, dt)
@@ -134,6 +129,10 @@ update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle)
 
 	// check colllisions against all collidableObjects
 	check_collisions(self, collidableObjects)
+
+	// update the current player sprite 
+	check_animation(self)
+	sprite.update(&self.sprite, dt)
 }
 
 @(private="file")
@@ -194,11 +193,12 @@ check_animation :: proc(self: ^Player) {
 
 	currentAnim := cast(PlayerAnimations)self.sprite.curr
 
+	defer self.wasOnFloor = self.onFloor
+
 	// If the current animation is one of out special oneshots
 	if (currentAnim == .JUMP || currentAnim == .LAND) {
 		// check for if the sprite is finished. If it is not, return early
 		if (!sprite.is_finished(&self.sprite)) {
-			self.wasOnFloor = self.onFloor
 			return 
 		}
 	}
@@ -206,7 +206,6 @@ check_animation :: proc(self: ^Player) {
 	// If the player has just landed, set the animation to be the land anim
 	if (justLanded) {
 		sprite.play(&self.sprite, PlayerAnimations.LAND)
-		self.wasOnFloor = self.onFloor
 		return 
 	}
 
@@ -214,7 +213,6 @@ check_animation :: proc(self: ^Player) {
 	// We must have jumped, play the jump animation
 	if (justLeftGround && self.moveable.velocity.y < -0.7) {
 		sprite.play(&self.sprite, PlayerAnimations.JUMP)
-		self.wasOnFloor = self.onFloor
 		return 
 	}
 
@@ -238,9 +236,6 @@ check_animation :: proc(self: ^Player) {
 			sprite.play(&self.sprite, PlayerAnimations.IDLE)
 		}
 	}
-
-	// set wasOnFloor to be if the player is currently on the floor
-	self.wasOnFloor = self.onFloor
 }
 
 @(private)
@@ -281,10 +276,13 @@ check_player_collision :: proc(self: ^Player, rec: rl.Rectangle, rotation: f32 =
 draw_player :: proc(self: ^Player) {
 	// check if the player is hit
 	flipped := self.moveable.direction < 0
-	// rl.DrawRectangleV(self.pos, self.size, self.colour)
 
 	// draw the current sprite
-	sprite.draw(&self.sprite, self.pos + {0, -4}, scale = 4, hFlip = flipped)
+	sprite.draw(&self.sprite, self.pos + {0, 1}, scale = 4, hFlip = flipped)
+
+	// rl.DrawRectangleLinesEx(
+	// 	{self.pos.x, self.pos.y, self.size.x, self.size.y}, 1, rl.RED
+	// )
 }
 
 @(private)

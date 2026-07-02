@@ -16,13 +16,13 @@ setup :: proc() {
 	pFlags := game.create_player_flags(
 		//pos & size
 		{250, 250}, {60, 60}, 
-		// starting dir and horizontal movement 
-		// direction: 1, maxSpeed: 400, accel: 400*6, friction: 1500, 
+
 		// the player hitbox
 		hb.new_hitbox(0, 0, 60, 60, 0, true),
 		moveable.new_moveable(
 			400 * 6, 400, 1500, 1
 		),
+
 		// vertical movement
 		650, 2200,
 		rl.LoadTexture("src/assets/playerChar/herochar_spritesheet(new).png"),

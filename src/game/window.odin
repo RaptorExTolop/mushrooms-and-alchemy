@@ -31,5 +31,6 @@ createWindow :: proc(windowFlags: WindowFlags) {
 
 	rl.ClearWindowState({.WINDOW_RESIZABLE})
 	rl.SetExitKey(windowFlags.ExitKey)
+	rl.SetTargetFPS(480)
 }
 

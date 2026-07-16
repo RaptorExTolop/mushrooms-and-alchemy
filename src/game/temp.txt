@@ -1,0 +1,1 @@
+src/assets/pack1/hud-elements/hearts_hud.png

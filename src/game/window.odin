@@ -7,21 +7,25 @@ import rl "vendor:raylib"
 WindowFlags :: struct {
 	Dimensions: rl.Vector2,
 	Title: cstring,
-	ExitKey: rl.KeyboardKey
+	ExitKey: rl.KeyboardKey,
+	MaxFps: i32,
 }
 
-createWindowFlags :: proc(dims: rl.Vector2, title: cstring, exitKey: rl.KeyboardKey) -> WindowFlags {
+createWindowFlags :: proc(
+	dims: rl.Vector2, title: cstring, exitKey: rl.KeyboardKey, maxFps: i32 = 480
+) -> WindowFlags {
 	return {
 		Dimensions = dims,
 		Title = title,
 		ExitKey = exitKey,
+		MaxFps = maxFps,
 	}
 }
 
 createWindow :: proc(windowFlags: WindowFlags) {
 	rl.InitWindow(
-		i32(windowFlags.Dimensions[0]), 
-		i32(windowFlags.Dimensions[1]), 
+		i32(windowFlags.Dimensions.x), 
+		i32(windowFlags.Dimensions.y), 
 		windowFlags.Title,
 	)
 	
@@ -31,6 +35,6 @@ createWindow :: proc(windowFlags: WindowFlags) {
 
 	rl.ClearWindowState({.WINDOW_RESIZABLE})
 	rl.SetExitKey(windowFlags.ExitKey)
-	rl.SetTargetFPS(480)
+	rl.SetTargetFPS(windowFlags.MaxFps)
 }
 

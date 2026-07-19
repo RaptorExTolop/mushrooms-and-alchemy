@@ -60,7 +60,7 @@ Player :: struct {
 	moveable: moveable.Moveable,
 
 	// The sprite for the player
-	sprite: sprite.Sprite,
+	sprite: sprite.AnimatableSprite,
 
 	// Used for drawing a rectangle under the player
 	colour: rl.Color,
@@ -95,7 +95,7 @@ new_player :: proc(pFlags: PlayerFlags) -> Player {
 	player.jumpStrength = pFlags.jumpStrength
 	player.gravity = pFlags.gravity
 
-	player.sprite = sprite.new_sprite(pFlags.spriteImg)
+	player.sprite = sprite.new_animatable_sprite(pFlags.spriteImg)
 
 	
 
@@ -132,7 +132,7 @@ update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle)
 
 	// update the current player sprite 
 	check_animation(self)
-	sprite.update(&self.sprite, dt)
+	sprite.update_animatable_sprite(&self.sprite, dt)
 }
 
 @(private="file")
@@ -198,21 +198,21 @@ check_animation :: proc(self: ^Player) {
 	// If the current animation is one of out special oneshots
 	if (currentAnim == .JUMP || currentAnim == .LAND) {
 		// check for if the sprite is finished. If it is not, return early
-		if (!sprite.is_finished(&self.sprite)) {
+		if (!sprite.is_animation_finished(&self.sprite)) {
 			return 
 		}
 	}
 
 	// If the player has just landed, set the animation to be the land anim
 	if (justLanded) {
-		sprite.play(&self.sprite, PlayerAnimations.LAND)
+		sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.LAND)
 		return 
 	}
 
 	// If the player has just left the ground, and we are moving up (world space)
 	// We must have jumped, play the jump animation
 	if (justLeftGround && self.moveable.velocity.y < -0.7) {
-		sprite.play(&self.sprite, PlayerAnimations.JUMP)
+		sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.JUMP)
 		return 
 	}
 
@@ -221,19 +221,19 @@ check_animation :: proc(self: ^Player) {
 		// If we are going down, play the down animation
 		// If we are going up, play the up animation
 		if (self.moveable.velocity.y > 0) {
-			sprite.play(&self.sprite, PlayerAnimations.DOWN)
+			sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.DOWN)
 		} else {
-			sprite.play(&self.sprite, PlayerAnimations.UP)
+			sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.UP)
 		}
 	// If we are on the floor
 	} else {
 		// Check for horizontal movement
 		if (math.abs(self.moveable.velocity.x) > 0) {
 			// if there is we are running
-			sprite.play(&self.sprite, PlayerAnimations.RUNNING)
+			sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.RUNNING)
 		} else {
 			// otherwise we are not moving at all
-			sprite.play(&self.sprite, PlayerAnimations.IDLE)
+			sprite.play_animatable_sprite(&self.sprite, PlayerAnimations.IDLE)
 		}
 	}
 }
@@ -278,7 +278,7 @@ draw_player :: proc(self: ^Player) {
 	flipped := self.moveable.direction < 0
 
 	// draw the current sprite
-	sprite.draw(&self.sprite, self.pos + {0, 1}, scale = 4, hFlip = flipped)
+	sprite.draw_animatable_sprite(&self.sprite, self.pos + {0, 1}, scale = 4, hFlip = flipped)
 
 	// rl.DrawRectangleLinesEx(
 	// 	{self.pos.x, self.pos.y, self.size.x, self.size.y}, 1, rl.RED
@@ -287,6 +287,6 @@ draw_player :: proc(self: ^Player) {
 
 @(private)
 cleanup_player :: proc(self: ^Player) {
-	rl.UnloadTexture(self.sprite.img)
+	sprite.cleanup_dynamic_sprite(&self.sprite)
 }
 

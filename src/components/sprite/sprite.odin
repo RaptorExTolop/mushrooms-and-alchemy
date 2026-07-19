@@ -3,14 +3,58 @@ package sprite
 import rl "vendor:raylib"
 import anim "shared:animation-system"
 import "base:intrinsics"
+import "core:fmt"
 
-Sprite :: struct {
+AnimatableSprite :: struct {
 	img: rl.Texture2D,
 	animations: [dynamic]anim.Animation,
 	curr: i32
 }
 
-new_sprite :: proc(img: rl.Texture2D, curr: i32 = 0) -> Sprite{
+StaticSprite :: struct {
+	img: rl.Texture2D,
+	src: map[string]rl.Rectangle,
+}
+
+new_static_sprite :: proc(img: rl.Texture2D) -> StaticSprite {
+	src: map[string]rl.Rectangle = make(map[string]rl.Rectangle)
+	src["DEFAULT"] = {0, 0, f32(img.width), f32(img.height)}
+	return {
+		img = img,
+		src = src,
+	}
+}
+
+add_sub_image :: proc(self: ^StaticSprite, name: string, src: rl.Rectangle, override: bool = false) {
+	if (self.src[name] == {} && !override) do fmt.printf("Attempting to override set sprite")
+	self.src[name] = src
+}
+
+draw_static_sprite :: proc(
+	self: ^StaticSprite, position: rl.Vector2, 
+	name: string = "DEFAULT", rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE,
+	hFlip: bool = false, vFlip: bool = false
+) {
+	srcRec : rl.Rectangle
+	if (name in self.src) {
+		srcRec = self.src[name]
+	} else {
+		srcRec = self.src["DEFAULT"]
+	}
+
+	if (vFlip) do srcRec.height = -srcRec.height
+	if (hFlip) do srcRec.width = -srcRec.width 
+	
+	dest := rl.Rectangle{
+		position.x, position.y,
+		abs(srcRec.width) * scale, abs(srcRec.height) * scale,
+	}
+
+	rl.DrawTexturePro(self.img, srcRec, dest, {0, 0}, rotation, tint)
+
+}
+
+new_animatable_sprite :: proc(img: rl.Texture2D, curr: i32 = 0) -> AnimatableSprite {
 	return {
 		img = img,
 		curr = curr,
@@ -18,7 +62,9 @@ new_sprite :: proc(img: rl.Texture2D, curr: i32 = 0) -> Sprite{
 	}
 }
 
-add_animation :: proc(self: ^Sprite, animation: anim.Animation, animationEnumValue: $E) where intrinsics.type_is_enum(E) {
+add_animation :: proc(
+	self: ^AnimatableSprite, animation: anim.Animation, animationEnumValue: $E
+) where intrinsics.type_is_enum(E) {
 	idx := i32(animationEnumValue)
 	if (i32(len(self.animations)) <= idx) {
 		resize(&self.animations, idx + 1)
@@ -27,7 +73,9 @@ add_animation :: proc(self: ^Sprite, animation: anim.Animation, animationEnumVal
 	self.animations[idx] = animation
 }
 
-play :: proc(self: ^Sprite, animationEnumValue: $E) where intrinsics.type_is_enum(E) {
+play_animatable_sprite :: proc(
+	self: ^AnimatableSprite, animationEnumValue: $E
+) where intrinsics.type_is_enum(E) {
 	nextIdx := i32(animationEnumValue)
 
 	if (self.curr != nextIdx) {
@@ -36,14 +84,15 @@ play :: proc(self: ^Sprite, animationEnumValue: $E) where intrinsics.type_is_enu
 	}
 }
 
-update :: proc(self: ^Sprite, dt: f32) {
+update_animatable_sprite :: proc(self: ^AnimatableSprite, dt: f32) {
 	if (len(self.animations) == 0) do return 
 	anim.update_animation(&self.animations[self.curr], dt)
 }
 
-draw :: proc(
-	self: ^Sprite, position: rl.Vector2, rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE, hFlip: bool = false,
-	vFlip: bool = false
+draw_animatable_sprite :: proc(
+	self: ^AnimatableSprite, position: rl.Vector2, 
+	rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE, 
+	hFlip: bool = false, vFlip: bool = false
 ) {
 	if (len(self.animations) == 0) {
 		rl.DrawTextureEx(self.img, position, rotation, scale, tint)
@@ -60,7 +109,15 @@ draw :: proc(
 
 	rl.DrawTexturePro(self.img, src, dest, {0, 0}, rotation, tint)
 }
-is_finished :: proc(self: ^Sprite) -> bool {
+is_animation_finished :: proc(self: ^AnimatableSprite) -> bool {
 	return self.animations[self.curr].finished
+}
+
+cleanup_static_sprite :: proc(self: ^StaticSprite) {
+	rl.UnloadTexture(self.img)
+}
+
+cleanup_dynamic_sprite :: proc(self: ^AnimatableSprite) {
+	rl.UnloadTexture(self.img)
 }
 

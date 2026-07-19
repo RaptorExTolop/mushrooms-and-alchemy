@@ -6,17 +6,17 @@ import sprite "../components/sprite/"
 import anim "shared:animation-system"
 
 Game :: struct {
-	Player: Player,
-
+	player: Player,
+	font: sprite.StaticSprite
 }
 
 GameFlags :: struct {
-
+	gameFont: sprite.StaticSprite,
 }
 
-create_game_flags :: proc() -> GameFlags {
+create_game_flags :: proc(font: sprite.StaticSprite) -> GameFlags {
 	return {
-
+		gameFont = font
 	}
 }
 
@@ -58,15 +58,16 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 
 	
 	return {
-		Player = p,
+		font = gFlags.gameFont,
+		player = p,
 	}
 }
 
 update :: proc(self: ^Game) {
-	update_player(&self.Player, rl.GetFrameTime(), { { 100, 300, 100, 100 }, { 0, 520, 1280, 200 }})
+	update_player(&self.player, rl.GetFrameTime(), { { 100, 300, 100, 100 }, { 0, 520, 1280, 200 }})
 
-	// check_player_collisions(&self.Player, {100, 300, 100, 100})
-	// check_player_collisions(&self.Player, {0, 520, 1280, 200})
+	// check_player_collisions(&self.player, {100, 300, 100, 100})
+	// check_player_collisions(&self.player, {0, 520, 1280, 200})
 }
 
 draw :: proc(self: ^Game) {
@@ -77,7 +78,9 @@ draw :: proc(self: ^Game) {
 
 	rl.DrawRectangleRec({100, 300, 100, 100}, rl.GRAY)
 	rl.DrawRectangleRec({0, 520, 1280, 200}, rl.BROWN)
-	draw_player(&self.Player)
+	draw_player(&self.player)
+
+	sprite.draw_static_sprite(&self.font, {100, 100}, "a", scale = 4)
 
 	rl.EndDrawing()
 }
@@ -87,6 +90,7 @@ check_game_is_running :: proc(self: ^Game) -> bool {
 }
 
 cleanup :: proc(self: ^Game) {
-	cleanup_player(&self.Player)
+	cleanup_player(&self.player)
+	sprite.cleanup_static_sprite(&self.font)
 }
 

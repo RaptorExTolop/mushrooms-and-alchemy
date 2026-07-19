@@ -4,6 +4,7 @@ import "core:fmt"
 import rl "vendor:raylib"
 import hb "components/hitbox"
 import "components/moveable"
+import "components/sprite"
 
 import "game"
 
@@ -28,7 +29,10 @@ setup :: proc() {
 		rl.LoadTexture("src/assets/playerChar/herochar_spritesheet(new).png"),
 	)
 
-	GameInst = game.new_game({}, pFlags)
+	gFont := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/hud-elements/hearts_hud.png"))
+	gFlags := game.create_game_flags(gFont)
+
+	GameInst = game.new_game(gFlags, pFlags)
 }
 
 main :: proc() {

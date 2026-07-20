@@ -55,8 +55,6 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	)
 	sprite.add_animation(&p.sprite, landAnim, PlayerAnimations.LAND)
 
-
-	
 	return {
 		font = gFlags.gameFont,
 		player = p,
@@ -80,7 +78,8 @@ draw :: proc(self: ^Game) {
 	rl.DrawRectangleRec({0, 520, 1280, 200}, rl.BROWN)
 	draw_player(&self.player)
 
-	sprite.draw_static_sprite(&self.font, {100, 100}, "a", scale = 4)
+	sprite.draw_static_sprite(&self.font, {100, 100}, "6", scale = 6)
+	sprite.draw_static_sprite(&self.font, {100+(6*7), 100}, "9", scale = 6)
 
 	rl.EndDrawing()
 }

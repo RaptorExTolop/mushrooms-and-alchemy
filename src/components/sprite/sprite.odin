@@ -26,19 +26,30 @@ new_static_sprite :: proc(img: rl.Texture2D) -> StaticSprite {
 }
 
 add_sub_image :: proc(self: ^StaticSprite, name: string, src: rl.Rectangle, override: bool = false) {
-	if (self.src[name] == {} && !override) do fmt.printf("Attempting to override set sprite")
+	if (self.src[name] != {} && !override) {
+		fmt.printf("Attempting to override set sprite: {}\n", name)
+		return
+	} 
 	self.src[name] = src
 }
 
 draw_static_sprite :: proc(
 	self: ^StaticSprite, position: rl.Vector2, 
 	name: string = "DEFAULT", rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE,
-	hFlip: bool = false, vFlip: bool = false
+	hFlip: bool = false, vFlip: bool = false, autoDefault: bool = true 
 ) {
 	srcRec : rl.Rectangle
 	if (name in self.src) {
 		srcRec = self.src[name]
 	} else {
+		if (!autoDefault) {
+			fmt.printf(
+				`Unknown sprite texture with overriding disabled.
+				Sprite named: {} does not have a texture attached to it.
+				`, name
+			)
+			return
+		}
 		srcRec = self.src["DEFAULT"]
 	}
 

@@ -29,7 +29,17 @@ setup :: proc() {
 		rl.LoadTexture("src/assets/playerChar/herochar_spritesheet(new).png"),
 	)
 
-	gFont := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/hud-elements/hearts_hud.png"))
+	gFont := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/hud-elements/fonts.png"))
+	sprite.add_sub_image(&gFont, "0", {0, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "1", {7, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "2", {14, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "3", {7*3, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "4", {7*4, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "5", {7*5, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "6", {7*6, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "7", {7*7, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "8", {7*8, 0, 7, 7})
+	sprite.add_sub_image(&gFont, "9", {7*9, 0, 7, 7})
 	gFlags := game.create_game_flags(gFont)
 
 	GameInst = game.new_game(gFlags, pFlags)

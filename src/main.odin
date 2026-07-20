@@ -40,7 +40,26 @@ setup :: proc() {
 	sprite.add_sub_image(&gFont, "7", {7*7, 0, 7, 7})
 	sprite.add_sub_image(&gFont, "8", {7*8, 0, 7, 7})
 	sprite.add_sub_image(&gFont, "9", {7*9, 0, 7, 7})
-	gFlags := game.create_game_flags(gFont)
+
+	alphabet := "abcdefghijklmnopqrstuvwxyz"
+	for i := 0; i < len(alphabet); i += 1 {
+		// Offset by 10 because numbers 0-9 already occupy the first 10 slots
+		total_index := i + 10 
+
+		col := total_index % 10
+		row := total_index / 10
+
+		// Slice out a 1-character string key
+		char_key := alphabet[i:i+1] 
+
+		sprite.add_sub_image(&gFont, char_key, {f32(col * 7), f32(row * 7), 7, 7})
+	}
+	sprite.add_sub_image(&gFont, "!", {7*6, 7*3, 7, 7})
+	sprite.add_sub_image(&gFont, "?", {7*7, 7*3, 7, 7})
+	sprite.add_sub_image(&gFont, "/", {7*8, 7*3, 7, 7})
+	
+	heart := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/hud-elements/hearts_hud.png"))
+	gFlags := game.create_game_flags(gFont, heart)
 
 	GameInst = game.new_game(gFlags, pFlags)
 }

@@ -138,8 +138,8 @@ update_player :: proc(self: ^Player, dt: f32, collidableObjects: []rl.Rectangle)
 @(private="file")
 get_player_dir :: proc() -> i32 {
 	dir : i32 = 0
-	if (rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT)) do dir += -1
-	if (rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT)) do dir += 1
+	if (rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT)) || rl.IsKeyDown(.J) do dir += -1
+	if (rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT)) || rl.IsKeyDown(.L) do dir += 1
 	return dir
 }
 
@@ -171,7 +171,7 @@ calculate_velocity :: proc(self: ^Player, dt: f32, dir: i32) {
 // allow the player to jump
 @(private="file")
 jump :: proc(self: ^Player, dt: f32) {
-	if ( (rl.IsKeyDown(.SPACE) || rl.IsKeyDown(.UP) || rl.IsKeyDown(.W)) && self.onFloor) {
+	if ( (rl.IsKeyDown(.SPACE) || rl.IsKeyDown(.UP) || rl.IsKeyDown(.I) || rl.IsKeyDown(.W)) && self.onFloor) {
 		self.moveable.velocity.y -= self.jumpStrength 
 	}
 }

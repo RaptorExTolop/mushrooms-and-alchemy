@@ -7,16 +7,19 @@ import anim "shared:animation-system"
 
 Game :: struct {
 	player: Player,
-	font: sprite.StaticSprite
+	font: sprite.StaticSprite, 
+	heartSprite: sprite.StaticSprite,
 }
 
 GameFlags :: struct {
 	gameFont: sprite.StaticSprite,
+	heartSprite: sprite.StaticSprite,
 }
 
-create_game_flags :: proc(font: sprite.StaticSprite) -> GameFlags {
+create_game_flags :: proc(font: sprite.StaticSprite, heartSprite: sprite.StaticSprite) -> GameFlags {
 	return {
-		gameFont = font
+		gameFont = font,
+		heartSprite = heartSprite,
 	}
 }
 
@@ -57,6 +60,7 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 
 	return {
 		font = gFlags.gameFont,
+		heartSprite = gFlags.heartSprite,
 		player = p,
 	}
 }
@@ -78,9 +82,18 @@ draw :: proc(self: ^Game) {
 	rl.DrawRectangleRec({0, 520, 1280, 200}, rl.BROWN)
 	draw_player(&self.player)
 
-	sprite.draw_static_sprite(&self.font, {100, 100}, "6", scale = 6)
-	sprite.draw_static_sprite(&self.font, {100+(6*7), 100}, "9", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21, 21+49}, "1", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21+(7*7), 21+49}, "6", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21, 21}, "h", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21+(49*1), 21}, "e", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21+(49*2), 21}, "l", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21+(49*3), 21}, "l", scale = 6)
+	sprite.draw_static_sprite(&self.font, {21+(49*4), 21}, "o", scale = 6)
 
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
+	
 	rl.EndDrawing()
 }
 
@@ -91,5 +104,6 @@ check_game_is_running :: proc(self: ^Game) -> bool {
 cleanup :: proc(self: ^Game) {
 	cleanup_player(&self.player)
 	sprite.cleanup_static_sprite(&self.font)
+	sprite.cleanup_static_sprite(&self.heartSprite)
 }
 

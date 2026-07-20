@@ -59,7 +59,11 @@ setup :: proc() {
 	sprite.add_sub_image(&gFont, "/", {7*8, 7*3, 7, 7})
 	
 	heart := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/hud-elements/hearts_hud.png"))
-	gFlags := game.create_game_flags(gFont, heart)
+
+	background := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/backgrounds/background_layer_1.png"))
+	midground := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/backgrounds/background_layer_2.png"))
+	foreground := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/backgrounds/background_layer_3.png"))
+	gFlags := game.create_game_flags(gFont, heart, background, midground, foreground)
 
 	GameInst = game.new_game(gFlags, pFlags)
 }

@@ -1,7 +1,7 @@
 package game
 
-import rl "vendor:raylib"
 import "core:math"
+import rl "vendor:raylib"
 import sprite "../components/sprite/"
 import anim "shared:animation-system"
 
@@ -9,17 +9,26 @@ Game :: struct {
 	player: Player,
 	font: sprite.StaticSprite, 
 	heartSprite: sprite.StaticSprite,
+	background, midground, foreground: sprite.StaticSprite,
+	backgroundOffset, midgroundOffset, foregroundOffset: f32,
 }
 
 GameFlags :: struct {
 	gameFont: sprite.StaticSprite,
 	heartSprite: sprite.StaticSprite,
+	background, midground, foreground: sprite.StaticSprite,
 }
 
-create_game_flags :: proc(font: sprite.StaticSprite, heartSprite: sprite.StaticSprite) -> GameFlags {
+create_game_flags :: proc(
+	font: sprite.StaticSprite, heartSprite: sprite.StaticSprite,
+	background, midground, foreground: sprite.StaticSprite,
+) -> GameFlags {
 	return {
 		gameFont = font,
 		heartSprite = heartSprite,
+		background = background,
+		midground = midground,
+		foreground = foreground,
 	}
 }
 
@@ -61,27 +70,73 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 	return {
 		font = gFlags.gameFont,
 		heartSprite = gFlags.heartSprite,
+		background = gFlags.background,
+		midground = gFlags.midground,
+		foreground = gFlags.foreground,
+		backgroundOffset = 0, 
+		foregroundOffset = 0, 
+		midgroundOffset = 0,
 		player = p,
 	}
 }
 
 update :: proc(self: ^Game) {
-	update_player(&self.player, rl.GetFrameTime(), { { 100, 300, 100, 100 }, { 0, 520, 1280, 200 }})
+	update_player(&self.player, rl.GetFrameTime(), { { 100, 450, 100, 100 }, { 0, 650, 1280, 200 }})
 
-	// check_player_collisions(&self.player, {100, 300, 100, 100})
-	// check_player_collisions(&self.player, {0, 520, 1280, 200})
+	horiVel := self.player.moveable.velocity.x
+	self.backgroundOffset -= horiVel * 0.1 * rl.GetFrameTime()	
+	self.midgroundOffset  -= horiVel * 0.3 * rl.GetFrameTime()	
+	self.foregroundOffset -= horiVel * 0.7 * rl.GetFrameTime()
+
+	scaled_width := self.background.img.width * 4
+
+	self.backgroundOffset = math.mod(self.backgroundOffset, f32(scaled_width))
+	if (self.backgroundOffset < 0) do self.backgroundOffset += f32(scaled_width)
+
+	self.midgroundOffset = math.mod(self.midgroundOffset, f32(scaled_width))
+	if (self.midgroundOffset < 0) do self.midgroundOffset += f32(scaled_width)
+
+	self.foregroundOffset = math.mod(self.foregroundOffset, f32(scaled_width))
+	if (self.foregroundOffset < 0) do self.foregroundOffset += f32(scaled_width)
 }
 
 draw :: proc(self: ^Game) {
 	rl.BeginDrawing()
 
 	rl.ClearBackground(rl.SKYBLUE)
+
+	scaledWidth := f32(self.background.img.width) * 4
+	sprite.draw_static_sprite(&self.background, {self.backgroundOffset, 0}, scale = 4)
+	sprite.draw_static_sprite(
+		&self.background, {self.backgroundOffset - scaledWidth , 0}, scale = 4
+	)
+
+	sprite.draw_static_sprite(&self.midground, {self.midgroundOffset, 0}, scale = 4)
+	sprite.draw_static_sprite(
+		&self.midground, {self.midgroundOffset - scaledWidth, 0}, scale = 4
+	)
+
+	sprite.draw_static_sprite(&self.foreground, {self.foregroundOffset, 0}, scale = 4)
+	sprite.draw_static_sprite(
+		&self.foreground, {self.foregroundOffset - scaledWidth, 0}, scale = 4
+	)
+
 	rl.DrawFPS(0, 0)
 
-	rl.DrawRectangleRec({100, 300, 100, 100}, rl.GRAY)
-	rl.DrawRectangleRec({0, 520, 1280, 200}, rl.BROWN)
+	rl.DrawRectangleRec({100, 450, 100, 100}, rl.GRAY)
+	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
 	draw_player(&self.player)
 
+	say_hello_test(self)
+
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
+
+	rl.EndDrawing()
+}
+
+say_hello_test :: proc(self: ^Game) {
 	sprite.draw_static_sprite(&self.font, {21, 21+49}, "1", scale = 6)
 	sprite.draw_static_sprite(&self.font, {21+(7*7), 21+49}, "6", scale = 6)
 	sprite.draw_static_sprite(&self.font, {21, 21}, "h", scale = 6)
@@ -89,12 +144,6 @@ draw :: proc(self: ^Game) {
 	sprite.draw_static_sprite(&self.font, {21+(49*2), 21}, "l", scale = 6)
 	sprite.draw_static_sprite(&self.font, {21+(49*3), 21}, "l", scale = 6)
 	sprite.draw_static_sprite(&self.font, {21+(49*4), 21}, "o", scale = 6)
-
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
-	
-	rl.EndDrawing()
 }
 
 check_game_is_running :: proc(self: ^Game) -> bool {
@@ -103,7 +152,11 @@ check_game_is_running :: proc(self: ^Game) -> bool {
 
 cleanup :: proc(self: ^Game) {
 	cleanup_player(&self.player)
+
 	sprite.cleanup_static_sprite(&self.font)
 	sprite.cleanup_static_sprite(&self.heartSprite)
+	sprite.cleanup_static_sprite(&self.background)
+	sprite.cleanup_static_sprite(&self.foreground)
+	sprite.cleanup_static_sprite(&self.midground)
 }
 

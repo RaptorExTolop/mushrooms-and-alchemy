@@ -81,12 +81,18 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 }
 
 update :: proc(self: ^Game) {
-	update_player(&self.player, rl.GetFrameTime(), { { 100, 450, 100, 100 }, { 0, 650, 1280, 200 }})
+	dt := rl.GetFrameTime()
+	update_player(&self.player, dt, { { 100, 650-80, 80, 800 }, { 0, 650, 1280, 200 }})
+	update_background(self, dt)
+}
 
+@(private="file")
+update_background :: proc(self: ^Game, dt: f32) {
 	horiVel := self.player.moveable.velocity.x
-	self.backgroundOffset -= horiVel * 0.1 * rl.GetFrameTime()	
-	self.midgroundOffset  -= horiVel * 0.3 * rl.GetFrameTime()	
-	self.foregroundOffset -= horiVel * 0.7 * rl.GetFrameTime()
+
+	self.backgroundOffset -= horiVel * 0.05 * dt	
+	self.midgroundOffset  -= horiVel * 0.2 * dt	
+	self.foregroundOffset -= horiVel * 0.5 * dt
 
 	scaled_width := self.background.img.width * 4
 
@@ -98,13 +104,34 @@ update :: proc(self: ^Game) {
 
 	self.foregroundOffset = math.mod(self.foregroundOffset, f32(scaled_width))
 	if (self.foregroundOffset < 0) do self.foregroundOffset += f32(scaled_width)
+
 }
+
+
 
 draw :: proc(self: ^Game) {
 	rl.BeginDrawing()
 
 	rl.ClearBackground(rl.SKYBLUE)
+	draw_background(self)
 
+	rl.DrawFPS(0, 0)
+
+	rl.DrawRectangleRec({100, 650-80, 80, 80}, rl.GRAY)
+	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
+	draw_player(&self.player)
+
+	say_hello_test(self)
+
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
+	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
+
+	rl.EndDrawing()
+}
+
+@(private="file")
+draw_background :: proc(self: ^Game) {
 	scaledWidth := f32(self.background.img.width) * 4
 	sprite.draw_static_sprite(&self.background, {self.backgroundOffset, 0}, scale = 4)
 	sprite.draw_static_sprite(
@@ -120,20 +147,6 @@ draw :: proc(self: ^Game) {
 	sprite.draw_static_sprite(
 		&self.foreground, {self.foregroundOffset - scaledWidth, 0}, scale = 4
 	)
-
-	rl.DrawFPS(0, 0)
-
-	rl.DrawRectangleRec({100, 450, 100, 100}, rl.GRAY)
-	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
-	draw_player(&self.player)
-
-	say_hello_test(self)
-
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
-
-	rl.EndDrawing()
 }
 
 say_hello_test :: proc(self: ^Game) {

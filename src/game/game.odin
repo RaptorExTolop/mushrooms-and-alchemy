@@ -82,7 +82,7 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 
 update :: proc(self: ^Game) {
 	dt := rl.GetFrameTime()
-	update_player(&self.player, dt, { { 100, 650-80, 80, 800 }, { 0, 650, 1280, 200 }})
+	update_player(&self.player, dt, { { 100, 650-32, 32, 32 }, { 0, 650, 1280, 200 }})
 	update_background(self, dt)
 }
 
@@ -90,9 +90,9 @@ update :: proc(self: ^Game) {
 update_background :: proc(self: ^Game, dt: f32) {
 	horiVel := self.player.moveable.velocity.x
 
-	self.backgroundOffset -= horiVel * 0.05 * dt	
-	self.midgroundOffset  -= horiVel * 0.2 * dt	
-	self.foregroundOffset -= horiVel * 0.5 * dt
+	self.backgroundOffset -= horiVel * 0.03 * dt	
+	self.midgroundOffset  -= horiVel * 0.06 * dt	
+	self.foregroundOffset -= horiVel * 0.15 * dt
 
 	scaled_width := self.background.img.width * 4
 
@@ -117,7 +117,7 @@ draw :: proc(self: ^Game) {
 
 	rl.DrawFPS(0, 0)
 
-	rl.DrawRectangleRec({100, 650-80, 80, 80}, rl.GRAY)
+	rl.DrawRectangleRec({100, 650-32, 32, 32}, rl.GRAY)
 	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
 	draw_player(&self.player)
 

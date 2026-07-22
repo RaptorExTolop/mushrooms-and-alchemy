@@ -11,13 +11,17 @@ AnimatableSprite :: struct {
 	curr: i32
 }
 
+SpriteName :: union {
+	string, i32
+}
+
 StaticSprite :: struct {
 	img: rl.Texture2D,
-	src: map[string]rl.Rectangle,
+	src: map[SpriteName]rl.Rectangle,
 }
 
 new_static_sprite :: proc(img: rl.Texture2D) -> StaticSprite {
-	src: map[string]rl.Rectangle = make(map[string]rl.Rectangle)
+	src: map[SpriteName]rl.Rectangle = make(map[SpriteName]rl.Rectangle)
 	src["DEFAULT"] = {0, 0, f32(img.width), f32(img.height)}
 	return {
 		img = img,
@@ -25,7 +29,7 @@ new_static_sprite :: proc(img: rl.Texture2D) -> StaticSprite {
 	}
 }
 
-add_sub_image :: proc(self: ^StaticSprite, name: string, src: rl.Rectangle, override: bool = false) {
+add_sub_image :: proc(self: ^StaticSprite, name: SpriteName, src: rl.Rectangle, override: bool = false) {
 	if (self.src[name] != {} && !override) {
 		fmt.printf("Attempting to override set sprite: {}\n", name)
 		return
@@ -35,7 +39,7 @@ add_sub_image :: proc(self: ^StaticSprite, name: string, src: rl.Rectangle, over
 
 draw_static_sprite :: proc(
 	self: ^StaticSprite, position: rl.Vector2, 
-	name: string = "DEFAULT", rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE,
+	name: SpriteName = "DEFAULT", rotation: f32 = 0, scale: f32 = 1, tint: rl.Color = rl.WHITE,
 	hFlip: bool = false, vFlip: bool = false, autoDefault: bool = true 
 ) {
 	srcRec : rl.Rectangle

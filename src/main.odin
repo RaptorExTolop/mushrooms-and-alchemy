@@ -5,10 +5,19 @@ import rl "vendor:raylib"
 import hb "components/hitbox"
 import "components/moveable"
 import "components/sprite"
+import tm "components/tilemap"
 
 import "game"
 
+Vec2 :: rl.Vector2
+Rec2 :: rl.Rectangle
+
 GameInst : game.Game
+
+bkgTiles : []i32 : {
+	10, 11, 12,
+	25, 08, 26,
+}
 
 setup :: proc() {
 	windowFlags := game.createWindowFlags({1280, 720}, "Mushrooms and Alchemy", .Q)
@@ -65,7 +74,14 @@ setup :: proc() {
 	foreground := sprite.new_static_sprite(rl.LoadTexture("src/assets/pack1/backgrounds/background_layer_3.png"))
 	gFlags := game.create_game_flags(gFont, heart, background, midground, foreground)
 
-	GameInst = game.new_game(gFlags, pFlags)
+	bkgTileMap := tm.new_tile_map(
+		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), bkgTiles, tm.new_grid(64, 3, 2)
+	)
+	foregroundTileMap := tm.new_tile_map(
+		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), {}, tm.new_grid(64, 0, 0)
+	)
+
+	GameInst = game.new_game(gFlags, pFlags, bkgTileMap, foregroundTileMap)
 }
 
 main :: proc() {

@@ -4,6 +4,10 @@ import "core:math"
 import rl "vendor:raylib"
 import sprite "../components/sprite/"
 import anim "shared:animation-system"
+import tm "../components/tilemap"
+
+Vec2 :: rl.Vector2
+Rec2 :: rl.Rectangle
 
 Game :: struct {
 	player: Player,
@@ -11,6 +15,8 @@ Game :: struct {
 	heartSprite: sprite.StaticSprite,
 	background, midground, foreground: sprite.StaticSprite,
 	backgroundOffset, midgroundOffset, foregroundOffset: f32,
+	bkgTileMap: tm.TileMap,
+	foregroundTileMap: tm.TileMap,
 }
 
 GameFlags :: struct {
@@ -32,9 +38,9 @@ create_game_flags :: proc(
 	}
 }
 
-
-
-new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
+new_game :: proc (
+	gFlags: GameFlags, pFlags: PlayerFlags, backgroundTileMap, foregroundTileMap: tm.TileMap
+) -> Game {
 	p := new_player(pFlags)
 
 	idleAnim := anim.new_animation(
@@ -77,6 +83,8 @@ new_game :: proc (gFlags: GameFlags, pFlags: PlayerFlags) -> Game {
 		foregroundOffset = 0, 
 		midgroundOffset = 0,
 		player = p,
+		bkgTileMap = backgroundTileMap,
+		foregroundTileMap = foregroundTileMap,
 	}
 }
 
@@ -119,15 +127,27 @@ draw :: proc(self: ^Game) {
 
 	rl.DrawRectangleRec({100, 650-32, 32, 32}, rl.GRAY)
 	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
+
+	tm.draw_tiles(&self.bkgTileMap)
 	draw_player(&self.player)
+	tm.draw_tiles(&self.foregroundTileMap)
 
 	say_hello_test(self)
-
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5)
-	sprite.draw_static_sprite(&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5)
+	draw_hud(self)
 
 	rl.EndDrawing()
+}
+
+draw_hud :: proc(self: ^Game) {
+	sprite.draw_static_sprite(
+		&self.heartSprite, {1280-f32(self.heartSprite.img.width*2)-(14*2.5), 21}, scale = 2.5
+	)
+	sprite.draw_static_sprite(
+		&self.heartSprite, {1280-f32(self.heartSprite.img.width*4)-(14*3.5), 21}, scale = 2.5
+	)
+	sprite.draw_static_sprite(
+		&self.heartSprite, {1280-f32(self.heartSprite.img.width*6)-(14*4.5), 21}, scale = 2.5
+	)
 }
 
 @(private="file")
@@ -171,5 +191,8 @@ cleanup :: proc(self: ^Game) {
 	sprite.cleanup_static_sprite(&self.background)
 	sprite.cleanup_static_sprite(&self.foreground)
 	sprite.cleanup_static_sprite(&self.midground)
+
+	tm.cleanup(&self.bkgTileMap)
+	tm.cleanup(&self.foregroundTileMap)
 }
 

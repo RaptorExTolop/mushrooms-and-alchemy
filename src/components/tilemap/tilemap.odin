@@ -73,7 +73,7 @@ new_tile_map :: proc(
 		sprite.add_sub_image(&t.tMap, i32(idx), tile)
 	}
 
-	for tType in tileMap {
+	for tType, _ in tileMap {
 		assert(tType >= 0 && int(tType) < len(tiles), "Too large of a number used in tilemap")
 	}
 
@@ -86,6 +86,8 @@ new_tile_map :: proc(
 
 	return t
 }
+
+
 
 draw_tiles :: proc(tMap: ^TileMap) {
 	for tile, idx in tMap.tiles {

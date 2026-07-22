@@ -14,7 +14,7 @@ Rec2 :: rl.Rectangle
 
 GameInst : game.Game
 
-bkgTiles : []i32 : {
+bkgTiles : []i32 = {
 	10, 11, 12,
 	25, 08, 26,
 }

@@ -19,6 +19,11 @@ bkgTiles : []i32 = {
 	25, 08, 26,
 }
 
+bkgTilesCollision : []i32 = {
+	1, 0, 1,
+	0, 1, 1,
+}
+
 setup :: proc() {
 	windowFlags := game.createWindowFlags({1280, 720}, "Mushrooms and Alchemy", .Q)
 	game.createWindow(windowFlags)
@@ -75,10 +80,10 @@ setup :: proc() {
 	gFlags := game.create_game_flags(gFont, heart, background, midground, foreground)
 
 	bkgTileMap := tm.new_tile_map(
-		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), bkgTiles, tm.new_grid(64, 3, 2)
+		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), bkgTiles, tm.new_grid(48, 3, 2)
 	)
 	foregroundTileMap := tm.new_tile_map(
-		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), {}, tm.new_grid(64, 0, 0)
+		rl.LoadTexture("src/assets/tileMap/sheet.png"), tm.new_grid(16, 17, 8), {}, tm.new_grid(32, 0, 0)
 	)
 
 	GameInst = game.new_game(gFlags, pFlags, bkgTileMap, foregroundTileMap)

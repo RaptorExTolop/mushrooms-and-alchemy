@@ -128,9 +128,9 @@ draw :: proc(self: ^Game) {
 	rl.DrawRectangleRec({100, 650-32, 32, 32}, rl.GRAY)
 	rl.DrawRectangleRec({0, 650, 1280, 200}, rl.BROWN)
 
-	tm.draw_tiles(&self.bkgTileMap)
+	tm.draw_tiles(&self.bkgTileMap, 3)
 	draw_player(&self.player)
-	tm.draw_tiles(&self.foregroundTileMap)
+	tm.draw_tiles(&self.foregroundTileMap, 3)
 
 	say_hello_test(self)
 	draw_hud(self)

@@ -89,7 +89,7 @@ new_tile_map :: proc(
 
 
 
-draw_tiles :: proc(tMap: ^TileMap) {
+draw_tiles :: proc(tMap: ^TileMap, scale: f32 = 1) {
 	for tile, idx in tMap.tiles {
 		position: rl.Vector2
 		position.x = f32((i32(idx) % tMap.cols)) * tMap.size.x + tMap.offset.x //- 4
@@ -97,7 +97,7 @@ draw_tiles :: proc(tMap: ^TileMap) {
 
 
 		sprite.draw_static_sprite(
-			&tMap.tMap, position, i32(tile), autoDefault = false, scale = 4
+			&tMap.tMap, position, i32(tile), autoDefault = false, scale = scale	
 		)
 	}
 }

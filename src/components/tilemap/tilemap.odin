@@ -55,6 +55,7 @@ new_tile_map :: proc(
 	tiles : [dynamic]Rec2
 	defer delete(tiles)
 
+	append(&tiles, Rec2{0, 0, 0, 0})
 	for y : i32 = 0; y < srcImg.rows; y += 1 {
 		for x : i32 = 0; x < srcImg.cols; x += 1 {
 			// fmt.printf("x: {} y: {}\n", x, y)

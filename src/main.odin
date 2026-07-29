@@ -43,8 +43,8 @@ bkgTilesCollision : []i32 = {
 }
 
 setup :: proc() {
-	windowFlags := game.createWindowFlags({1280, 720}, "Mushrooms and Alchemy", .Q)
-	game.createWindow(windowFlags)
+	windowFlags := game.create_window_flags({1280, 720}, "Mushrooms and Alchemy", .Q)
+	game.create_window(windowFlags)
 
 	pFlags := game.create_player_flags(
 		//pos & size

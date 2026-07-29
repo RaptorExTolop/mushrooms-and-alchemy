@@ -11,7 +11,7 @@ WindowFlags :: struct {
 	MaxFps: i32,
 }
 
-createWindowFlags :: proc(
+create_window_flags :: proc(
 	dims: rl.Vector2, title: cstring, exitKey: rl.KeyboardKey, maxFps: i32 = 480
 ) -> WindowFlags {
 	return {
@@ -22,7 +22,7 @@ createWindowFlags :: proc(
 	}
 }
 
-createWindow :: proc(windowFlags: WindowFlags) {
+create_window :: proc(windowFlags: WindowFlags) {
 	rl.InitWindow(
 		i32(windowFlags.Dimensions.x), 
 		i32(windowFlags.Dimensions.y), 
